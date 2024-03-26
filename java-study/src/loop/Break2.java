@@ -5,6 +5,7 @@ public class Break2 {
         int sum = 0;
         int i = 1;
 
+        //조건없이 무한 루프
         for (; ; ) {
             sum = sum + i;
             if (sum > 10) {

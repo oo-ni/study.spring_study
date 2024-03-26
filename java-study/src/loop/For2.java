@@ -8,7 +8,7 @@ public class For2 {
 
         //sum=1+2+3
         for (int i = 1; i <= endNum; i++) {
-            sum = sum + i;
+            sum += i;
             System.out.println("i=" + i + " sum=" + sum);
         }
     }
