@@ -1,8 +1,12 @@
 package com.example.demo.config;
 
+import com.example.demo.security.CustomAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,26 +15,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.security.Provider;
+
 @Configuration  // 클래스를 구성 클래스로 표시
 public class ProjectConfig {
+    // 생성자 DI
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final CustomAuthenticationProvider customAuthenticationProvider;
 
-    @Bean       // 반환된 값을 스프링 컨텍스트에 빈으로 추가하도록 스프링에 지시
-    public UserDetailsService userDetailsService() {
-        var userDetailsService = new InMemoryUserDetailsManager();  // var 키워드로 구문을 간소화, 세부 정보를 감춤, 로컬 선언에만 이용
-
-        var user = User.withUsername("yoon")    // 주어진 사용자 이름, 암호, 권한 목록으로 사용자 생성
-                .password("1234")
-                .authorities("read")
-                .build();
-
-        userDetailsService.createUser(user);    // UserDetailsService에서 관리하도록 사용자 추가
-
-        return userDetailsService;
+    public ProjectConfig(AuthenticationConfiguration authenticationConfiguration, CustomAuthenticationProvider customAuthenticationProvider) {
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.customAuthenticationProvider = customAuthenticationProvider;
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+    public AuthenticationManager authenticationManager() throws Exception {
+        ProviderManager providerManager = (ProviderManager) authenticationConfiguration.getAuthenticationManager();
+        providerManager.getProviders().add(this.customAuthenticationProvider);
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
